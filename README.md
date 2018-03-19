@@ -55,7 +55,7 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539
 ### 查询chaincode
 下面我们把这个ID放入一个变量中：</br>
-`CC_ID=ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539`</br>
+`CC_ID="ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539"`</br>
 下面我们来查询一下a账户的余额：</br>
 `peer chaincode query -n ${CC_ID} -c '{"Function": "query", "Args": ["a"]}'`</br>
 Query Result: 100 </br>
