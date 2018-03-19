@@ -22,13 +22,13 @@ https://www.cnblogs.com/tianhei/p/7802064.html
 https://www.cnblogs.com/studyzy/p/7492637.html
 ## Fabric
 ### 拉取Fabric v0.6镜像
-`docker pull yeasy/hyperledger-fabric-base:0.6-dp \
+``docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-membersrvc:0.6-dp \
   && docker pull yeasy/blockchain-explorer:latest \
   && docker tag yeasy/hyperledger-fabric-peer:0.6-dp hyperledger/fabric-peer \
   && docker tag yeasy/hyperledger-fabric-base:0.6-dp hyperledger/fabric-baseimage \
-  && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc`
+  && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc``
 注意多拉几次，全部拉成功，可能网络原因会连接失败
 
 ### clone demo
