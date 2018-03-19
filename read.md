@@ -25,6 +25,7 @@ https://www.cnblogs.com/tianhei/p/7802064.html</br>
 https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ## Fabric
 ### 拉取Fabric v0.6镜像
+
 ```sh
 $ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
@@ -94,6 +95,7 @@ body部分：</br>
     } 
   }, 
   "id": 1 
-}```
+}
+```
 header部分:</br>
 `Content-Type:text/javascript`</br>
