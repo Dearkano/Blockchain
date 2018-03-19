@@ -35,7 +35,7 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 `git clone https://github.com/yeasy/docker-compose-files`
 
 ### 启动peer
-`cd docker-compose-files/hyperledger_fabric/v0.6/pbft/`</br>
+`cd docker-compose-files/hyperledger_fabric/v0.6.0/pbft/`</br>
 `docker-compose -f 4-peers.yml up`</br>
 可以看到终端中已经成功运行了peer网络
 
