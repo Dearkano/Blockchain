@@ -79,7 +79,7 @@ https://pan.baidu.com/s/1mSdtfURbKauk2WYYPn_YmA</br>
 在ifconfig里找到虚拟机的IP,我这里地址是192.168.198.128:7050/chaincode，然后在DHC里发送http请求即可完成调用</br>
 一个示例
 body部分：</br>
-``{ 
+```{ 
   "jsonrpc": "2.0", 
   "method": "deploy", 
   "params": { 
@@ -93,6 +93,6 @@ body部分：</br>
     } 
   }, 
   "id": 1 
-}``</br>
+}```</br>
 header部分:</br>
 `Content-Type:text/javascript`</br>
