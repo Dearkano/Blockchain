@@ -1,6 +1,6 @@
 # Blockchain_fabric
 Study hyperledger fabric
-###Author：Dearkano 3/19/2018
+### Author：Dearkano 3/19/2018
 ## Hyperledger Fabric v0.6 安装与测试
 ## Prerequisites
 ### 操作系统
@@ -77,7 +77,7 @@ https://pan.baidu.com/s/1mSdtfURbKauk2WYYPn_YmA</br>
 解压以后把_metadata重命名metadata然后用chrome添加即可</br>
 （下面是使用虚拟机的内容）</br>
 在ifconfig里找到虚拟机的IP,我这里地址是192.168.198.128:7050/chaincode，然后在DHC里发送http请求即可完成调用</br>
-一个示例
+一个示例</br>
 body部分：</br>
 ```sh
 { 
@@ -98,3 +98,4 @@ body部分：</br>
 ```
 header部分:</br>
 `Content-Type:text/javascript`</br>
+成功后会返回Code200，建议虚拟机使用vmware，vbox可能会出现主机ping不到客户机的情况。
