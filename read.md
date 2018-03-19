@@ -17,7 +17,7 @@
 `sudo apt-get update`
 ### 安装docker与docker-compose
 由于国内网络原因使用镜像</br>
-https://www.cnblogs.com/tianhei/p/7802064.html
+https://www.cnblogs.com/tianhei/p/7802064.html</br>
 或</br>
 https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ## Fabric
@@ -52,9 +52,9 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539
 ### 查询chaincode
 下面我们把这个ID放入一个变量中：</br>
-`CC_ID=ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539`
+`CC_ID=ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539`</br>
 下面我们来查询一下a账户的余额：</br>
-`peer chaincode query -n ${CC_ID} -c '{"Function": "query", "Args": ["a"]}'`
+`peer chaincode query -n ${CC_ID} -c '{"Function": "query", "Args": ["a"]}'`</br>
 Query Result: 100 </br>
 可以看到余额是100元</br>
 ### 调用chaincode
@@ -69,3 +69,22 @@ Query Result: 90 </br>
 首先安装chrome插件DHC</br>
 （下面是使用虚拟机的内容）</br>
 找到虚拟机的IP，然后在DHC里发送http请求即可完成调用</br>
+一个示例
+body部分：</br>
+``{ 
+  "jsonrpc": "2.0", 
+  "method": "deploy", 
+  "params": { 
+    "type": 1, 
+    "chaincodeID":{ 
+        "path":"github.com/hyperledger/fabric/examples/chaincode/go/chaincode_example02" 
+    }, 
+    "ctorMsg": { 
+        "function":"init", 
+        "args":["a", "1000", "b", "2000"] 
+    } 
+  }, 
+  "id": 1 
+}``</br>
+header部分:</br>
+`Content-Type:text/javascript`</br>
