@@ -43,6 +43,7 @@ $ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
 `cd docker-compose-files/hyperledger_fabric/v0.6.0/pbft/`</br>
 `docker-compose -f 4-peers.yml up`</br>
 可以看到终端中已经成功运行了peer网络
+
 ### 部署chaincode
 在当前地址打开另一个终端</br>
 `docker exec -it pbft_vp0_1 bash`</br>
@@ -93,6 +94,6 @@ body部分：</br>
     } 
   }, 
   "id": 1 
-}```</br>
+}```
 header部分:</br>
 `Content-Type:text/javascript`</br>
