@@ -1,3 +1,6 @@
+# Blockchain_fabric
+Study hyperledger fabric
+###Author：Dearkano 3/19/2018
 ## Hyperledger Fabric v0.6 安装与测试
 ## Prerequisites
 ### 操作系统
@@ -22,13 +25,15 @@ https://www.cnblogs.com/tianhei/p/7802064.html</br>
 https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ## Fabric
 ### 拉取Fabric v0.6镜像
-``docker pull yeasy/hyperledger-fabric-base:0.6-dp \
+```sh
+$ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-membersrvc:0.6-dp \
   && docker pull yeasy/blockchain-explorer:latest \
   && docker tag yeasy/hyperledger-fabric-peer:0.6-dp hyperledger/fabric-peer \
   && docker tag yeasy/hyperledger-fabric-base:0.6-dp hyperledger/fabric-baseimage \
-  && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc``</br>
+  && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc
+```
 注意多拉几次，全部拉成功，可能网络原因会连接失败
 
 ### clone demo
@@ -52,7 +57,7 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539
 ### 查询chaincode
 下面我们把这个ID放入一个变量中：</br>
-`CC_ID=ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539`</br>
+`CC_ID="ee5b24a1f17c356dd5f6e37307922e39ddba12e5d2e203ed93401d7d05eb0dd194fb9070549c5dc31eb63f4e654dbd5a1d86cbb30c48e3ab1812590cd0f78539"`</br>
 下面我们来查询一下a账户的余额：</br>
 `peer chaincode query -n ${CC_ID} -c '{"Function": "query", "Args": ["a"]}'`</br>
 Query Result: 100 </br>
@@ -74,7 +79,7 @@ https://pan.baidu.com/s/1mSdtfURbKauk2WYYPn_YmA</br>
 在ifconfig里找到虚拟机的IP,我这里地址是192.168.198.128:7050/chaincode，然后在DHC里发送http请求即可完成调用</br>
 一个示例
 body部分：</br>
-``{ 
+```{ 
   "jsonrpc": "2.0", 
   "method": "deploy", 
   "params": { 
@@ -88,6 +93,6 @@ body部分：</br>
     } 
   }, 
   "id": 1 
-}``</br>
+}```</br>
 header部分:</br>
 `Content-Type:text/javascript`</br>
