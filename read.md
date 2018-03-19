@@ -71,7 +71,7 @@ Query Result: 90 </br>
 https://pan.baidu.com/s/1mSdtfURbKauk2WYYPn_YmA</br>
 解压以后把_metadata重命名metadata然后用chrome添加即可</br>
 （下面是使用虚拟机的内容）</br>
-找到虚拟机的IP，然后在DHC里发送http请求即可完成调用</br>
+在ifconfig里找到虚拟机的IP,我这里地址是192.168.198.128:7050/chaincode，然后在DHC里发送http请求即可完成调用</br>
 一个示例
 body部分：</br>
 ``{ 
