@@ -25,6 +25,7 @@ https://www.cnblogs.com/tianhei/p/7802064.html</br>
 https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ## Fabric
 ### 拉取Fabric v0.6镜像
+
 ```sh
 $ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
@@ -35,6 +36,16 @@ $ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc
 ```
 注意多拉几次，全部拉成功，可能网络原因会连接失败
+
+使用默认镜像（官方dockhub）进行拉取时，往往会遇到速度极慢或handshake timeout的情况<br/>
+解决方案:换用国内仓库daocloud.如果你未遇到拉取过慢的情况，请跳过下面的内容<br/>
+``echo "DOCKER_OPTS=\"\$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io\"" | sudo tee -a /etc/default/docker
+  ``<br/>
+``service docker stop``<br/>
+修改 /etc/defaut/docker 文件，增加参数实行强制普通模式避免新版docker使用第三方仓库报错：<br/> 
+``DOCKER_OPTS="--insecure-registry http://dl.dockerpool.com:5000"``<br/>
+再重启服务：<br/> 
+``service docker restart``<br/>
 
 ### clone demo
 `git clone https://github.com/yeasy/docker-compose-files`
@@ -98,4 +109,4 @@ body部分：</br>
 ```
 header部分:</br>
 `Content-Type:text/javascript`</br>
-成功后会返回Code200，建议虚拟机使用vmware，vbox可能会出现主机ping不到客户机的情况。
+成功会返回code200,建议使用vmware，vbox可能出现主机ping不到客户机的情况。
