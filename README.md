@@ -27,7 +27,7 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ### 拉取Fabric v0.6镜像
 
 ```sh
-$ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
+$ sudo docker pull yeasy/hyperledger-fabric-base:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
   && docker pull yeasy/hyperledger-fabric-membersrvc:0.6-dp \
   && docker pull yeasy/blockchain-explorer:latest \
