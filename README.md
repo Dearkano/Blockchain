@@ -27,13 +27,13 @@ https://www.cnblogs.com/studyzy/p/7492637.html</br>
 ### 拉取Fabric v0.6镜像
 
 ```sh
-$ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
-  && docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
-  && docker pull yeasy/hyperledger-fabric-membersrvc:0.6-dp \
-  && docker pull yeasy/blockchain-explorer:latest \
-  && docker tag yeasy/hyperledger-fabric-peer:0.6-dp hyperledger/fabric-peer \
-  && docker tag yeasy/hyperledger-fabric-base:0.6-dp hyperledger/fabric-baseimage \
-  && docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc
+$ sudo docker pull yeasy/hyperledger-fabric-base:0.6-dp \
+  && sudo docker pull yeasy/hyperledger-fabric-peer:0.6-dp \
+  && sudo docker pull yeasy/hyperledger-fabric-membersrvc:0.6-dp \
+  && sudo docker pull yeasy/blockchain-explorer:latest \
+  && sudo docker tag yeasy/hyperledger-fabric-peer:0.6-dp hyperledger/fabric-peer \
+  && sudo docker tag yeasy/hyperledger-fabric-base:0.6-dp hyperledger/fabric-baseimage \
+  && sudo docker tag yeasy/hyperledger-fabric-membersrvc:0.6-dp hyperledger/fabric-membersrvc
 ```
 注意多拉几次，全部拉成功，可能网络原因会连接失败
 
@@ -41,11 +41,11 @@ $ docker pull yeasy/hyperledger-fabric-base:0.6-dp \
 解决方案:换用国内仓库daocloud.如果你未遇到拉取过慢的情况，请跳过下面的内容<br/>
 ``echo "DOCKER_OPTS=\"\$DOCKER_OPTS --registry-mirror=http://f2d6cb40.m.daocloud.io\"" | sudo tee -a /etc/default/docker
   ``<br/>
-``service docker stop``<br/>
+``sudo service docker stop``<br/>
 修改 /etc/defaut/docker 文件，增加参数实行强制普通模式避免新版docker使用第三方仓库报错：<br/> 
 ``DOCKER_OPTS="--insecure-registry http://dl.dockerpool.com:5000"``<br/>
 再重启服务：<br/> 
-``service docker restart``<br/>
+``sudo service docker restart``<br/>
 
 ### clone demo
 `git clone https://github.com/yeasy/docker-compose-files`
