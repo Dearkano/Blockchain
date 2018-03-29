@@ -1,9 +1,9 @@
 # Hyperledger Fabric架构
-原文：Architecture of the Hyperledger Blockchain Fabric
+原文：Architecture of the Hyperledger Blockchain Fabric  
 作者：Christian Cachin  
-IBM Research - Zurich CH-8803 R¨uschlikon, Switzerland
-翻译：Vayne Tian
-这篇文章是读完论文后翻译过来的，也算是给自己加深印象，有翻译的不好的地方多多见谅。
+IBM Research - Zurich CH-8803 R¨uschlikon, Switzerland  
+翻译：Vayne Tian  
+这篇文章是读完论文后翻译过来的，也算是给自己加深印象，有翻译的不好的地方多多见谅。  
 原文地址：https://pdfs.semanticscholar.org/f852/c5f3fe649f8a17ded391df0796677a59927f.pdf
 
 # 总览  
