@@ -1,7 +1,10 @@
 # Hyperledger Fabric :  A Distributed Operating System for Permissioned Blockchains
 （全文约21000字）
+
 原文：https://arxiv.org/pdf/1801.10228.pdf  
+
 作者：Elli Androulaki Artem Barger Vita Bortnikov Christian Cachin Konstantinos Christidis Angelo De Caro David Enyeart Christopher Ferris Gennady Laventman Yacov Manevich Srinivasan Muralidharan∗ Chet Murthy† Binh Nguyen ∗ Manish Sethi Gari Singh Keith Smith Alessandro Sorniotti Chrysoula Stathakopoulou Marko Vukoli´c Sharon Weed Cocco Jason Yellick I B M  
+
 翻译：Vayne Tian  
   
 ## 摘要
