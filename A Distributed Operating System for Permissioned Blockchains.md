@@ -329,3 +329,115 @@ ESCC的输入是一个交易提案和模拟执行的结果。如果结果满足�
 VSCC的输入是交易本身，输出则是交易是否有效。对于默认的VSCC而言，收集背书并与链码指定的背书策略校对，就能验证交易是否有效。
 
 其他的系统链码有别的作用，比如配置和链码的生命周期。
+
+## 5.评估
+
+即使现在Fabric还没有进行性能优化和改良，我们在这节中会报告一些预先执行的性能数据。Fabric是一个复杂的分布式系统，它的性能依赖于很多参数，包括分布式应用的选择和交易的大小，排序服务和共识算法的实现以及它们的参数，网络参数和节点网络的拓扑，运行的硬件，节点和信道的数量，其他的配置参数，以及网络的动态变化。因此，Fabric新能的深度评测将会在将来进行。
+
+因为没有一个标准的区块链测试的基准点，我们使用最重要的区块链应用来测试Fabric，一个简单的使用了比特币数据模型的权威铸造的加密货币，我们叫做Fabric Coin（Fabcoin）。这让我们可以将Fabric的性能和其他有准入机制的区块链比较，这些区块链往往是从比特币或者以太坊中分离出来的。比如，这个应用也被其他有准入机制区块链的作为测试基准点。
+
+接下来，我们首先会介绍Fabcoin（5.1节），这里会介绍如何自定义验证阶段和背书策略。在5.2节我们会展示基准点并讨论结果。
+
+### 5.1 Fabcoin
+
+* **UTXO 加密货币**  
+比特币推行的数据模型被广泛的定义为“没有用完的交易输出”或者UTXO，这也被许多其他的加密货币或者分布式应用采用。UTXO代表数据对象演化时的每个步骤都是账本上的一个分离的原子状态。这样一个被交易创建的状态被随后另一个发生的交易消费或是摧毁。每个给定的交易都会摧毁一定数量的输入状态并生成一个或更多的输出状态。比特币中的一个币是被一个coinbase的交易初始化创建的，并被奖励给挖掘出这个区块的矿工。从账本上看，就是一个币更改了状态，将矿工视为所有者。从这个意义上讲，花掉一个币，其实就是将所有权从原先的所有者转让给了新的所有者并更新了币的状态。
+
+我们捕获了Fabric中的键值对储存的UTXO模型，如下所示。每个UTXO状态对应一个唯一先前创立（币的状态是未被花费的），或是已经摧毁（币的状态是已经花费的）的KVS条目。等价地，在创建后，每个被视为KVS条目的状态的版本从0开始计算，当它被摧毁时，接收了版本号为1的状态。对同一个条目不应该有两条并行的更新（这叫做双花攻击）。
+
+UTXO模型中的值通过交易被转换成一些属于某个实体发布交易时的输入状态。实体本身有自己的状态，因为实体的公钥包含在实体状态内部。每个交易在KVS中创建了一条或者多条输出状态，代表新的所有者删除了KVS中的输入状态，并确保输入值的总数和输出值的总数相等。这里同样有决定如何创造价值（例如，比特币中的coinbase交易或者其他系统中的铸币操作）和销毁（例如，交易所花费的费用）的策略。
+
+* **Fabcoin的实现**  
+每个Fabcoin的状态都是键值对形式的元祖,(key,val)=(txid.j,(amount,owner,label))，其中货币的状态是标识符为txid的交易的第j个输出，配置amount数量个单元并用标签（Label）把它们标记给公钥是所有者的实体。标签是用来确定货币类型的字符串（例如，USD EUR FBC)。交易标识符是一些短的值可以唯一的标识每个Fabric的交易。Fabcoin的实现包含下面三个部分：
+* 客户钱包
+* Fabcoin链码
+* Fabcoin自定义的VSCC，实现自己的背书策略
+
+* **客户钱包**  
+默认情况下，每个Fabric客户有一个Fabcoin钱包，里面本地储存了一串加密密钥使得用户可以花费这些货币。当创建一个花费交易去转移一个或者更多的货币，客户钱包将创建一个Fabcoin请求 request = (inputs,outputs,sigs)包含了：
+* 1.输入货币的状态列表 inputs=[in,...]知道你过了客户希望花费的数量
+* 2.输出货币的状态列表 outputs=[(amount,owner,label),...]
+
+ 客户钱包使用对应输入状态的私钥签署Fabcoin请求的一系列事件和一个随机数，这是每个Fabric交易的一部分，并且将签名假如一个sigs集合中。对于一个消费交易来说，当输入值大于输出值并且输出值为正数时有效。对于铸币交易来说，输入只包括一个叫做中央银行（CB）的特殊实体的标识符（公钥的引用），输出可以是任意的货币状态。为了验证交易的有效性，sigs中铸币操作的签名必须是基于这一系列相关操作和CB的公钥的加密签名以及上文提到的随机数。Fabcoin可以使用多个CBs或者从一些CBs中指定一个签名阈值。最终，客户钱包囊括了Fabcoin对交易的请求并将它发送给了选择的节点。
+
+ * **Fabcoin链码**  
+ 节点会运行Fabcoin的链码，这些链码模拟交易并创建读取集和写入集。在一个极小容器中，进行消费交易时，对于任意输入的货币状态in，链码首先执行GetState(in)，这里会将in和它当前Fabric KVS（4.4节）的版本号放进读取集。然后链码对每个in执行DelState(in)，这同样会将in添加进写入集并将这个货币状态标记为已花费。最终，对于j=1,...,|outputs|,链码执行PutState(txid,j,out)，j代表outputs中第j个输出out = (amount,owner,label)。另外，节点可选择地运行交易验证代码，这将在下面Fabcoin中VSCC阶段中描述。这个操作并不是必要的，因为自定义的VSCC实际上会验证交易，但它允许正确的节点先筛选出可能出错的交易。在我们的实现中，链码毋须加密验证加密就可以运行Fabcoin的VSCC。
+
+ * **自定义VSCC**  
+ 最终，每个节点使用自定义VSCC验证了Fabcoin交易。首先根据对应密钥验证了sigs中加密签名并执行下面的验证操作。对于铸币交易而言，它会检查创建的输出状态中，是否匹配正确的交易标识符(txid)和输出是否都是正数。对于消费交易而言，VSCC额外验证：
+ * 对于所有的输入货币状态，条目已经在读取集创建并且被添加到了写入集而且标记为已删除。
+ * 所有的输入之和与输出之和相等
+ * 输出和输出的货币标签匹配
+
+ 这里VSCC通过从账本恢复当前的值来获取输入货币的数量。
+
+ 注意Fabcoin的VSCC不会检查双花攻击，因为这是通过Fabric的标准验证追踪自定义VSCC时产生的。特别地，如果两笔交易尝试将同一笔未花费的货币转让给新的所有者，它们都会经过VSCC逻辑但随后并不会被PTM在读写集矛盾检查时发现。根据3.4节和4,4节，PTM会验证当前账本和读取集中的版本号是否匹配，因此在第一个交易以及改变了货币的版本号后，第二笔交易会被认为非法。
+
+ ### 5.2 实验
+
+ **设置**  
+ 除非显示提及，在我们的试验中：
+ * 1. 节点在Fabric v1.1-preview上运行通过本地登录进行性能测试。
+ * 2.节点被寄存在一个的IBM云（SoftLayer）数据中心，这是1Gbps的专用的虚拟机网络。
+ * 3.所有的节点都使用2.0GHz 16-vCPU的虚拟机，使用Ubuntu系统，拥有8G内存以及SSD作为本地硬盘。
+ * 4.使用3个ZooKeeper节点，4个Kafka brokers和3个Fabric 排序节点在不同的虚拟机上运行单信道排序服务。
+ * 5.一共有五个节点，全部都是Fabcoin的背书节点。
+ * 6.签名使用默认的256为ECDSA策略。
+
+ 为了衡量和展现多节点交易流程中的延迟，实验中节点的时钟使用NTP服务进行同步。所有Fabric节点间的通信被配置为使用TLS。
+
+ **方法论**  
+ 在每个实验中，第一步我们调用只含有Fabcoin铸币操作的交易区产生货币，然后第二步调用消费操作的交易去花费先前产生的货币。（单输入，单输出的交易）。当报告吞吐量的测量时，我们使用递增数目的Fabric CLI客户（修改用作发布并行请求）在同一个虚拟机上运行，直到端到端吞吐量达到饱和，以及记录达到饱和前的吞吐量的状态。吞吐量的数量会使用实验迭代中的平均值，不考虑实验的最差情况，因为这时一些客户端已经完成了提交交易。每项试验中，客户端提交至少500k个铸币和消费请求。
+
+ **选择区块大小**  
+ 一个有争议的Fabric配置参数是吞吐量和延迟就是区块大小。为了在随后的实验中固定区块大小并且评估区块大小对性能的影响，我们将测试从0.5MB到4MB大小的区块。结果如图6所示，显示了吞吐量峰值和对应平均端到端延迟的关系。
+
+ ![avatar](https://github.com/Dearkano/Hyperledger-Fabric/blob/master/images/P2F6.png)
+
+
+我们可以观察到，吞吐量在区块大小超过2MB后并不会显著的提升，但是延迟变得更早（符合预期）。因此，我们采用2MB作为接下来实验所使用的区块大小，去测量吞吐量的最大值，并设定端到端延迟在500ms是可接受的。
+
+**交易大小**  
+在实验中，我们同样观察铸币和消费交易的大小。特别是，2MB区块包含了473个铸币交易和670个消费交易时，消费交易平均大小是3.06kB，铸币交易平均大小是4.33kB。通常来说，Fabric的交易比较大因为它们携带了证书信息。另外，Fabcoin的铸币交易比消费交易大是因为他们携带了CB证书。这都是将来Fabric和Fabcoin可以改良的地方。
+
+* **节点CPU的影响**
+Fabric节点会运行许多集中在CPU上进行的加密操作。为了测试CPU对于吞吐量的影响，我们执行了一系列分别在4,8,16,32 vCPU的虚拟机上运行4节点的情况，同时为了更好的确认瓶颈，将粗糙地展示区块验证延迟。我们的实验专注于验证阶段，因为Kafka排序服务在我们的实验中从来没有遇到瓶颈。验证阶段，特别是Fabcoin的VSCC验证，由于许多数字签名验证在这个阶段执行的，因此是集中化计算的。
+
+
+ ![avatar](https://github.com/Dearkano/Hyperledger-Fabric/blob/master/images/P2F7.png)
+
+
+2MB的区块的结果在图7中显示。消费交易延迟没有在图7中显示，因为它与铸币交易的延迟规模相似。我们可以观察到Fabcoin VSCC验证与CPU成线性关系，因为Fabric VSCC验证是尴尬地并行运行。然而，读写检查和账本访问阶段都是线性，因此CPU的核心数成为了主导。这显示将来版本的Fabric可以从验证阶段的传递途径（现在是线性的）来改良，还可以优化稳态储存的访问，还可以并行进行读写依赖检查。
+
+最终，在这个实验中，在32-vCPU节点上，我们测试了每秒超过3560笔交易的吞吐量。一般来说，铸币吞吐量稍低于消费交易吞吐量，但是差别在10%以内。
+
+
+ ![avatar](https://github.com/Dearkano/Hyperledger-Fabric/blob/master/images/P2T1.png)
+
+
+* **阶段性剖析延迟**  
+在先前吞吐量峰值的实验中，我们还进行了粗糙地延迟分析。结果在表1中显示.排序阶段包括广播-接收的延迟和验证开始前节点的内部延迟。表中显示了铸币和消费交易的平均延迟，标准差和尾延迟（99%和99.9%）。
+
+我们可以观察到排序主导了总延迟。我们还观察到在次秒级尾延迟的情况下，平均延迟低于550ms。特别是，实验中最高的端到端延迟来自第一个区块建立负载的时候。低负载的延迟可以通过利用排序服务的超时切分参数（3.3节）去校准和减少，而这我们没有在实验中使用，因为我们将它设置为了一个很大的值。
+
+* **SSD vs. RAM disk**  
+为了评估使用本地SSD进行稳态储存的开销，我们在所有的节点虚拟机上使用RAM disks(tmpfs)重复了先前的实验。优化并不明显，因为tmpfs只能帮助改善节点上的账本验证阶段。我们测试到在32-vCPU节点上进行消费交易的峰值是3870tps，仅仅比SSD高了9%。
+
+
+## 6.相关工作
+
+Fabric的架构和Kemme或Alonso这样的中间件副本数据库很相似。然而，这些现存的产品只能处理崩溃错误，并没有将对应BFT系统的分布式信任加入进去。例如，一个非对称更新的副本数据库依赖于节点去执行全部操作，而这在区块链上是不可行的。Fabric的排序-执行-验证架构可以被解释为这些产品的实际应用分布式账本的拜占庭模型的延伸版本。
+
+从BFT数据库副本的角度来看，Byzantium和HRDB是Fabric的两个前身。Byzantium允许交易并行运行并使用主动复制，但是完全使用BFT中间件对BEGIN和COMMIT/ROLLBACK进行排序。在它的改良版本中，操作是可以被主副本调整的。如果主副本被怀疑是Byzantine，那么所有的副本会对主副本执行交易并触发一个花费巨大的协议去更换主副本。与Fabric对比，这两个系统都使用了主动复制。然而，他们的数据库API比Fabric的KVS模型要丰富的多。
+
+Eve，是一个也扩展使用BFT模型的SMR相关架构。它的节点并行执行交易并且当他们都输出相同的结果时验证交易。如果产生分叉，就会回滚并线性执行。Eve包括独立执行的元素，同样在Fabric中也存在，但是并没有给予它其他的特性。
+
+最近很多有准入机制模型的分布式账本平台发布，我们不可能去把它们全部比较一遍（许多重要的平台比如Tendermint，Quorum，Chain Core，Multichain，HyperLedger Sawtooth，Volt proposal，还有很多。所有的这些平台都遵循排序-执行架构，这在第二节中讨论过。作为一个有代表性的例子，Quorum，一个以太坊的企业级版本。它的共识算法基于Raft，利用交流组件将交易分发给所有节点，Raft Leader（minter）会整合有效交易并写入区块，然后利用Raft分发消息。所有的节点会按照minter决定的顺序只想你个交易。因此会受到我们在1.2节中提到的局限性的限制。
+
+
+## 参考文献
+
+[1] P.-L. Aublin, R. Guerraoui, N. Kneˇzevi´c, V. Qu´ema, and M. Vukoli´c. The next 700 BFT protocols. ACM Trans. Comput. Syst., 32(4):12:1–12:45, Jan. 2015. [2] E. Ben-Sasson, A. Chiesa, C. Garman, M. Green, I. Miers, E.Tromer,andM.Virza. Zerocash:Decentralizedanonymous payments from bitcoin. In IEEE Symposium on Security & Privacy, pages 459–474, 2014. [3] A. N. Bessani, J. Sousa, and E. A. P. Alchieri. State machine replication for the masses with BFT-SMART. In InternationalConferenceonDependableSystemsandNetworks (DSN), pages 355–362, 2014. [4] G.BrachaandS.Toueg. Asynchronousconsensusandbroadcast protocols. J. ACM, 32(4):824–840, 1985. [5] E.Buchman. Tendermint:Byzantinefaulttoleranceintheage of blockchains. M.Sc. Thesis, University of Guelph, Canada, June 2016. [6] N.Budhiraja,K.Marzullo,F.B.Schneider,andS.Toueg. The primary-backupapproach.InS.Mullender,editor,Distributed Systems (2nd Ed.), pages 199–216. ACM Press/AddisonWesley, 1993. [7] C.Cachin,R.Guerraoui,andL.E.T.Rodrigues. Introduction to Reliable and Secure Distributed Programming (2. ed.). Springer, 2011. [8] C. Cachin, S. Schubert, and M. Vukoli´c. Non-determinism in byzantine fault-tolerant replication. In 20th International Conference on Principles of Distributed Systems (OPODIS), 2016. [9] C. Cachin and M. Vukoli´c. Blockchain consensus protocols in the wild. In A. W. Richa, editor, 31st Intl. Symposium on Distributed Computing (DISC 2017), pages 1:1–1:16, 2017. [10] J. Camenisch and E. V. Herreweghen. Design and implementation of the idemix anonymous credential system. In ACMConferenceonComputerandCommunicationsSecurity (CCS), pages 21–30, 2002. [11] M. Castro and B. Liskov. Practical Byzantine fault tolerance and proactive recovery. ACM Trans. Comput. Syst., 20(4):398–461, Nov. 2002. [12] Chain. Chain protocol whitepaper. https://chain.com/ docs/1.2/protocol/papers/whitepaper, 2017. [13] B. Charron-Bost, F. Pedone, and A. Schiper, editors. Replication: Theory and Practice, volume 5959 of Lecture Notes in Computer Science. Springer, 2010.
+14 2018/2/1
+[14] K. Croman, C. Decker, I. Eyal, A. E. Gencer, A. Juels, A. Kosba, A. Miller, P. Saxena, E. Shi, E. G. Sirer, et al. On scaling decentralized blockchains. In International Conference on Financial Cryptography and Data Security (FC), pages 106–125. Springer, 2016. [15] A. Demers, D. Greene, C. Hauser, W. Irish, J. Larson, S. Shenker, H. Sturgis, D. Swinehart, and D. Terry. Epidemic algorithms for replicated database maintenance. In ACM Symposium on Principles of Distributed Computing (PODC), pages 1–12. ACM, 1987. [16] T. T. A. Dinh, R. Liu, M. Zhang, G. Chen, B. C. Ooi, and J. Wang. Untangling blockchain: A data processing view of blockchain systems. e-print, arXiv:1708.05665 [cs.DB], 2017. [17] R. Garcia, R. Rodrigues, and N. M. Preguic¸a. Efﬁcient middleware for Byzantine fault tolerant database replication. In European Conference on Computer Systems (EuroSys), pages 107–122, 2011. [18] R.Guerraoui,R.R.Levy,B.Pochon,andV.Qu´ema.Throughput optimal total order broadcast for cluster environments. ACM Trans. Comput. Syst., 28(2):5:1–5:32, 2010. [19] J. P. Morgan. Quorum whitepaper. https://github.com/ jpmorganchase/quorum-docs, 2016. [20] F. P. Junqueira, B. C. Reed, and M. Seraﬁni. Zab: Highperformance broadcast for primary-backup systems. In International Conference on Dependable Systems & Networks (DSN), pages 245–256, 2011. [21] M. Kapritsos, Y. Wang, V. Qu´ema, A. Clement, L. Alvisi, and M. Dahlin. All about Eve: Execute-verify replication for multi-core servers. In Symposium on Operating Systems Design and Implementation (OSDI), pages 237–250, 2012. [22] R. Karp, C. Schindelhauer, S. Shenker, and B. Vocking. Randomized rumor spreading. In Symposium on Foundations of Computer Science (FOCS), pages 565–574. IEEE, 2000. [23] B. Kemme. One-copy-serializability. In Encyclopedia of Database Systems, pages 1947–1948. Springer, 2009. [24] B. Kemme and G. Alonso. A new approach to developing and implementing eager database replication protocols. ACM Transactions on Database Systems, 25(3):333–379, 2000. [25] B. Kemme, R. Jim´enez-Peris, and M. Pati˜no-Mart´ınez. Database Replication. Synthesis Lectures on Data Management. Morgan & Claypool Publishers, 2010. [26] A. E. Kosba, A. Miller, E. Shi, Z. Wen, and C. Papamanthou. Hawk: The blockchain model of cryptography and privacypreserving smart contracts. In 37th IEEE Symposium on Security & Privacy, 2016. [27] S. Liu, P. Viotti, C. Cachin, V. Qu´ema, and M. Vukoli´c. XFT: practical fault tolerance beyond crashes. In Symposium on OperatingSystemsDesignandImplementation(OSDI),pages 485–500, 2016. [28] S. Nakamoto. Bitcoin: A peer-to-peer electronic cash system. http://www.bitcoin.org/bitcoin.pdf, 2009. [29] D. Ongaro and J. Ousterhout. In search of an understandable consensus algorithm. In USENIX Annual Technical Conference (ATC), pages 305–320, 2014.
+[30] F. Pedone and A. Schiper. Handling message semantics with Generic Broadcast protocols. Distributed Computing, 15(2):97–107, 2002. [31] F. B. Schneider. Implementing fault-tolerant services using the state machine approach: A tutorial. ACM Comput. Surv., 22(4):299–319, 1990. [32] S. Setty, S. Basu, L. Zhou, M. L. Roberts, and R. Venkatesan. Enabling secure and resource-efﬁcient blockchain networks with VOLT. Technical Report MSR-TR-2017-38, Microsoft Research, 2017. [33] A.Singh,T.Das,P.Maniatis,P.Druschel,andT.Roscoe. BFT protocols under ﬁre. In Symposium on Networked Systems Design & Implementation (NSDI), pages 189–204, 2008. [34] J. Sousa, A. Bessani, and M. Vukoli´c. A Byzantine faulttolerant ordering service for the Hyperledger Fabric blockchain platform. Technical Report arXiv:1709.06921, CoRR, 2017. [35] B. Vandiver, H. Balakrishnan, B. Liskov, and S. Madden. Tolerating Byzantine faults in transaction processing systems using commit barrier scheduling. In ACM Symposium on Operating Systems Principles (SOSP), pages 59–72, 2007. [36] M. Vukoli´c. The quest for scalable blockchain fabric: Proofof-work vs. BFT replication. In International Workshop on Open Problems in Network Security (iNetSec), pages 112– 125, 2015. [37] J.Yin,J.Martin,A.Venkataramani,L.Alvisi,andM.Dahlin. Separating agreement from execution for Byzantine fault tolerant services. In ACM Symposium on Operating Systems Principles (SOSP), pages 253–267, 2003.
