@@ -17,3 +17,6 @@
 
 * 4/4/2018
     * **UPLOAD** Book : *Docker容器与容器云*
+
+* 4/6/2018
+    * **UPLOAD** Translation : *A First Look at Identity Management Schemes on the Blockchain*
