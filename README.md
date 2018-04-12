@@ -22,4 +22,7 @@
     * **UPLOAD** Translation : *A First Look at Identity Management Schemes on the Blockchain*
 
 * 4/12/2018
-    * **COMMIT** Code : Fabric Chaincode Test
+    * **COMMIT** Code : *Fabric Chaincode Test*
+
+* 4/12/2018
+    * **COMMIT** Instruction : *Fabric v1.1 Instruction*
