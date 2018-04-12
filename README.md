@@ -1,4 +1,4 @@
-### 记录在学习Hyperledger Fabric过程中遇到的问题和一些资源，以及一些论文的翻译。
+### 记录在学习Hyperledger Fabric和Blockchain过程中遇到的问题和一些资源，以及一些论文的翻译。
 
 ### TIMELINE
 
