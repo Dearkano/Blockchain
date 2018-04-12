@@ -43,3 +43,33 @@ Study hyperledger fabric
 https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/
 
 在源码下新建aberic文件夹 解压进去
+这里注意 对应自己的系统去下载
+
+然后将bin文件夹放在fabirc-samples下面
+
+## 一些坑 
+
+* 第一次up遇到这个bug
+
+After 5 attempts, PEER1 has failed to Join the Channel
+
+是环境遗留问题 去./byfn.sh down mychannel一下再开
+
+
+* 如果提示port被占用，停止容器并删除
+
+docker stop $(docker ps -a -q)
+
+docker rm $(docker ps -a -q)
+
+*  如果是在阿里云机器上部署fabric ，在e2e_cli 启动网络时，遇到以下错误
+
+ FAILED to execute End-2-End Scenario
+
+ 用户则需要修改 /etc/resolv.conf 配置，将 options timeout:2 attempts:3 rotate single-request-reopen 这一行内容注释掉
+
+ https://www.cnblogs.com/chenfool/p/8353425.html
+
+ 这篇博客的debug内容还不错 其他一概推荐官方教程
+
+ http://hyperledger-fabric.readthedocs.io/en/release-1.1/build_network.html
