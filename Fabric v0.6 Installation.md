@@ -1,6 +1,6 @@
 # Blockchain_fabric
 Study hyperledger fabric
-### Author：Dearkano 3/19/2018
+### Author：VayneTian 3/19/2018
 ## Hyperledger Fabric v0.6 安装与测试
 ## Prerequisites
 ### 操作系统
