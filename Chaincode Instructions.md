@@ -21,7 +21,7 @@ peer chaincode deploy -p github.com/hyperledger/fabric/examples/chaincode/go/cha
 
 * 自己的test1.go
 
-peer chaincode deploy -p github.com/Dearkano/Hyperledger-Fabric/Chaincode/test1 -c '{"Function":"init", "Args": []}'
+peer chaincode deploy -p github.com/Dearkano/Hyperledger-Fabric/Chaincode/test1.go -c '{"Function":"init", "Args": []}'
 
 * 查询
 
