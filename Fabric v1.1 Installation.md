@@ -64,7 +64,7 @@ docker stop $(docker ps -a -q)
 
 docker rm $(docker ps -a -q)
 
-docker system prune -a
+
 
 
 *  如果是在阿里云机器上部署fabric ，在e2e_cli 启动网络时，遇到以下错误
