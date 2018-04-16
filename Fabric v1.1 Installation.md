@@ -1,3 +1,5 @@
+
+
 # Blockchain_fabric
 Study hyperledger fabric
 ### Author：VayneTian 4/12/2018
@@ -63,6 +65,9 @@ After 5 attempts, PEER1 has failed to Join the Channel
 docker stop $(docker ps -a -q)
 
 docker rm $(docker ps -a -q)
+
+
+
 
 *  如果是在阿里云机器上部署fabric ，在e2e_cli 启动网络时，遇到以下错误
 
