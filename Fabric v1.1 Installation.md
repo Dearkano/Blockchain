@@ -5,20 +5,22 @@ Study hyperledger fabric
 ## Prerequisites
 ### 操作系统
 本文使用Ubuntu 16.04
-### 安装python2.7
-`sudo apt-get install python`
-### 安装golang1.9
-`sudo apt-get install golang`
-### 安装nodejs
-`sudo apt-get install nodejs`
-### 安装npm
-`sudo apt-get install npm`
 
-`npm install npm@5.6.0 -g`
-### 安装curl
-`sudo apt-get install curl`
-### 安装git
-`sudo apt-get install git`
+* `apt install git`
+* `curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -`
+* `apt install -y nodejs`
+* `apt install docker`
+* `apt install docker-compose`
+* `git clone https://github.com/hyperledger/fabric.git`
+* `git clone -b master https://github.com/hyperledger/fabric-samples.git`
+* `cd fabric/scripts`
+* `./bootstrap.sh`
+*  https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric/hyperledger-fabric/
+    * 下载对应系统的v1.0.0二进制 并解压到fabric-samples下面
+* `cd fabric-samples/first-netword`
+* `./byfn.sh -m generate`
+* `./byfn.sh -m up`
+
 
 ## 下载测试代码
 `git clone -b master https://github.com/hyperledger/fabric-samples.git`
@@ -73,3 +75,22 @@ docker rm $(docker ps -a -q)
  这篇博客的debug内容还不错 其他一概推荐官方教程
 
  http://hyperledger-fabric.readthedocs.io/en/release-1.1/build_network.html
+
+
+
+ ## 环境变量
+
+
+export CHANNEL_NAME=mychannel
+
+
+ CORE_PEER_MSPCONFIGPATH=./crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+
+CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+
+CORE_PEER_LOCALMSPID="Org1MSP"
+
+CORE_PEER_TLS_ROOTCERT_FILE=./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
+
+peer channel create -o orderer.example.com:7050 -c $CHANNEL_NAME -f ./channel-artifacts/channel.tx --tls --cafile ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
+
